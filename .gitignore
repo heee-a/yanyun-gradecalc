@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 本地素材：社区计算器原文件与个人装备截图，不入库
+source_data/
+shots/
+outputs/
+builds/*_private.json
