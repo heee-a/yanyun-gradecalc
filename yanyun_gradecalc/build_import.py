@@ -16,7 +16,7 @@ from .stats_dict import _PANEL_TO_AFFIX
 
 # 输入区下边界：A 列出现这些标签之后不再是属性输入
 _STOP_LABELS = {"食物加成", "第三心法", "笛", "机制"}
-_INPUT_MIN_ROW, _INPUT_MAX_ROW = 2, 24
+_INPUT_MIN_ROW, _INPUT_MAX_ROW = 2, 40  # DIY 计算器属性行到 40 行，靠 _STOP_LABELS 截断
 
 
 def _build_name(filename: str) -> str:
