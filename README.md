@@ -46,6 +46,24 @@ ygc score 照片1.jpg 照片2.jpg --build 破竹鸢 --json-out result.json
 ygc recognize 照片.jpg
 ```
 
+## 网页版（手机 / 电脑都能用）
+
+不想敲命令行？启动本地网页版（先装 flask：`pip install -e ".[web]"`）：
+
+```bash
+ygc-web            # 或 python -m yanyun_gradecalc.web
+```
+
+```
+网页版已就绪，浏览器打开：
+  http://localhost:8000        ← 电脑
+  http://192.168.x.x:8000      ← 手机（连同一 Wi-Fi）
+```
+
+手机打开局域网地址，直接拍照上传即可；识别出词条后可在页面上改数值、
+剔除误识别行，毕业度实时重算。若手机打不开，在 Windows 防火墙放行 Python。
+OCR 全程在本机运行，照片不会离开你的电脑。
+
 拍照片的姿势：**拍清楚词条区域**即可，不需要摆正——工具专门为斜拍做了校正。
 避免反光和摩尔纹过重的角度。
 
@@ -77,10 +95,12 @@ yanyun-gradecalc/
 │   ├── stats_dict.py     # 词条字典：别名归一化 / [转]荐标记 / 数值解析
 │   ├── build_import.py   # 计算器 xlsx -> builds/<流派>.json
 │   ├── scoring.py        # 满值表 / 滚动质量 / 流派加权毕业度
+│   ├── web.py            # 网页版后端（Flask，手机/电脑通用）
+│   ├── static/index.html # 网页版前端（单文件，纯色背景，无外部依赖）
 │   └── cli.py            # import-build / recognize / score
 ├── data/affix_max.json   # 110阶词条满值表（⚠ 待校对，欢迎 PR）
 ├── builds/               # 导入生成的流派数据（8 个流派，含 DIY 通用模板）
-└── tests/                # 15 个测试（不依赖 OCR 模型）
+└── tests/                # 18 个测试（网页层不依赖 OCR 模型）
 ```
 
 ## 声明

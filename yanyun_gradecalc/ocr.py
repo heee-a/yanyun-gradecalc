@@ -98,6 +98,23 @@ def recognize(image_path: str) -> Piece:
     return parse_ocr_result(result or [], source=str(image_path))
 
 
+def recognize_image(data: bytes, max_side: int = 2200) -> Piece:
+    """识别图片字节流（网页上传入口）。大图先等比缩小，显著加速 OCR。"""
+    import cv2
+    import numpy as np
+
+    buf = np.frombuffer(data, dtype=np.uint8)
+    img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+    if img is None:
+        raise ValueError("无法解码图片，请换一张（支持 jpg/png/webp）")
+    h, w = img.shape[:2]
+    scale = max_side / max(h, w)
+    if scale < 1:
+        img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+    result, _ = _get_ocr()(img)
+    return parse_ocr_result(result or [], source="upload")
+
+
 def parse_ocr_result(result, source: str = "") -> Piece:
     """把 RapidOCR 输出 [(box, text, score), ...] 解析为 Piece。"""
     piece = Piece(source=source)
