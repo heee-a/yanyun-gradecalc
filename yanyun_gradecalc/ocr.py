@@ -159,7 +159,10 @@ def parse_ocr_result(result, source: str = "") -> Piece:
         used_texts.add(n["text"])
         raw_ui = n["text"]
         if any(w in raw_ui for w in _UI_WORDS):
-            # 基础属性/界面行：保留到 base_stats，供网页端选择主词条
+            # 基础属性/界面行：仅保留真实属性（气血/防御/攻击类）供网页端选择主词条，
+            # 耐久度/穿戴等级/要求/等阶/战令等无意义行直接丢弃
+            if _is_junk_ui(raw_ui):
+                continue
             val, unit = parse_value(v["text"])  # type: ignore[misc]
             core = clean_ui_name(raw_ui)
             std = normalize_stat(core)
@@ -319,6 +322,15 @@ def _align(names: list[dict], values: list[dict]) -> list[tuple[dict, dict]]:
         i, k = pi, pk
     pairs.reverse()
     return pairs
+
+
+_JUNK_UI_WORDS = ("耐久度", "穿戴等级", "要求", "装备等阶", "精英战令", "精英战今",
+                  "生效等级", "更多设置")
+
+
+def _is_junk_ui(text: str) -> bool:
+    """该 UI 行是否为无意义行（不进入主词条候选）。"""
+    return any(w in text for w in _JUNK_UI_WORDS)
 
 
 def clean_ui_name(text: str) -> str:
