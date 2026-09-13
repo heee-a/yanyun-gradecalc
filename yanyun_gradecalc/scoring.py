@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .ocr import Affix, Piece
-from .stats_dict import stat_type
 
 # 毕业档位阈值（可按习惯调整）
 GRADES = [(90.0, "毕业"), (80.0, "准毕业"), (70.0, "可用"), (0.0, "过渡")]
