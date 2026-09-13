@@ -197,6 +197,21 @@ def _affix_json(a) -> dict:
             "known": a.known}
 
 
+def _maybe_save_qr(lan_ip: str, port: int) -> None:
+    """装有 qrcode 库时，自动把手机访问地址生成二维码图片（IP 变了重启即刷新）。"""
+    if not lan_ip:
+        return
+    try:
+        import qrcode
+    except ImportError:
+        print("（提示：pip install qrcode 可在启动时自动生成手机扫码二维码）")
+        return
+    url = f"http://{lan_ip}:{port}"
+    out = Path.cwd() / "手机访问二维码.png"
+    qrcode.make(url).save(out)
+    print(f"手机扫码二维码已保存: {out}（{url}）")
+
+
 def _lan_ips() -> list[str]:
     ips = ["localhost"]
     try:
@@ -221,8 +236,12 @@ def main(argv: list[str] | None = None) -> None:
 
     app = create_app(args.builds_dir, args.max_table)
     print("网页版已就绪，浏览器打开：")
+    lan_ip = ""
     for ip in _lan_ips():
         print(f"  http://{ip}:{args.port}")
+        if ip != "localhost" and not lan_ip:
+            lan_ip = ip
+    _maybe_save_qr(lan_ip, args.port)
     print("手机与电脑连同一 Wi-Fi 后可用局域网地址；若打不开，请在 Windows 防火墙放行 Python。")
     app.run(host=args.host, port=args.port, debug=False)
 

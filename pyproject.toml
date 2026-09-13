@@ -24,8 +24,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "flask>=3.0"]
-web = ["flask>=3.0"]
+dev = ["pytest>=7.0", "flask>=3.0", "qrcode>=7.4", "pillow>=9.0"]
+web = ["flask>=3.0", "qrcode>=7.4", "pillow>=9.0"]
 
 [project.scripts]
 ygc = "yanyun_gradecalc.cli:main"
