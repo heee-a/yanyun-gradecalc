@@ -19,7 +19,7 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from .ocr import recognize_image
+from .ocr import recognize_image, suggest_slot
 from .scoring import load_builds, load_max_table
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -153,6 +153,7 @@ def create_app(builds_dir: str | None = None, max_table_path: str | None = None)
             },
             "affixes": [_affix_json(a) for a in piece.affixes],
             "base_stats": [_affix_json(a) for a in piece.base_stats],
+            "suggest": suggest_slot(piece),
             "max_table": max_table,
             "builds": {name: b.get("affix_weights", {}) for name, b in builds.items()},
         })

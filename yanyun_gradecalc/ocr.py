@@ -202,6 +202,31 @@ def parse_ocr_result(result, source: str = "") -> Piece:
     return piece
 
 
+_SLOT_KEYWORDS = (
+    ("冠胄", "head"), ("胸甲", "chest"), ("胫甲", "legs"), ("护腿", "legs"),
+    ("腕甲", "hands"), ("护手", "hands"), ("戒指", "ring"), ("指环", "ring"),
+    ("环", "ring"), ("佩", "pendant"), ("项链", "pendant"),
+)
+
+
+def suggest_slot(piece: Piece) -> str | None:
+    """按识别出的部位词/基础属性行猜测装备部位，供网页端自动分格。
+
+    返回 head/chest/legs/hands/ring/pendant 之一；武器返回 "weapon"（由
+    调用方决定填 weapon1 还是 weapon2）；无法判断返回 None。
+    """
+    text = (piece.slot or "") + (piece.name or "")
+    for kw, slot in _SLOT_KEYWORDS:
+        if kw in text:
+            return slot
+    base_names = {b.name for b in piece.base_stats}
+    if base_names & {"最大外功攻击", "最大鸣金攻击", "最小外功攻击", "最小鸣金攻击"}:
+        return "weapon"
+    if base_names & {"气血最大值", "外功防御"}:
+        return "armor"  # 是防具但无法确定具体部位
+    return None
+
+
 def _repair_base_stats(piece: Piece) -> None:
     """修复基础属性行的经典错位。
 

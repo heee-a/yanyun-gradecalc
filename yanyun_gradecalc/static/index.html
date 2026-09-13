@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>燕云毕业度计算器</title>
+<title>燕云毕业度计算器 · 整套</title>
 <style>
   :root {
-    --bg: #f2f4f8;          /* 纯色背景 */
+    --bg: #f2f4f8;
     --card: #ffffff;
     --ink: #171e2b;
     --sub: #64748b;
@@ -17,7 +17,7 @@
     --ok-soft: #e6f7ef;
     --warn: #d97706;
     --danger: #dc2626;
-    --shadow: 0 1px 2px rgba(23, 30, 43, .05), 0 4px 14px rgba(23, 30, 43, .05);
+    --shadow: 0 1px 2px rgba(23,30,43,.05), 0 4px 14px rgba(23,30,43,.05);
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
@@ -28,111 +28,81 @@
   }
   header {
     position: sticky; top: 0; z-index: 20; background: var(--bg);
-    border-bottom: 1px solid var(--line); padding: 14px 16px 0;
+    border-bottom: 1px solid var(--line); padding: 14px 16px;
+    display: flex; align-items: baseline; gap: 10px;
   }
-  header h1 { font-size: 19px; margin: 0 0 10px; letter-spacing: .5px; }
-  header h1 span { color: var(--sub); font-size: 12px; font-weight: 400; margin-left: 10px; }
-  .tabs { display: flex; gap: 6px; }
-  .tab {
-    padding: 10px 20px; font-size: 15px; cursor: pointer; border: none;
-    border-radius: 12px 12px 0 0; background: #e7ebf2; color: var(--sub);
-    transition: background .15s, color .15s;
-  }
-  .tab:hover { background: #dde3ec; }
-  .tab.on { background: var(--card); color: var(--accent); font-weight: 600; box-shadow: 0 -2px 6px rgba(23,30,43,.04); }
+  header h1 { font-size: 19px; margin: 0; letter-spacing: .5px; }
+  header span { color: var(--sub); font-size: 12px; }
   main { max-width: 860px; margin: 0 auto; padding: 16px 16px 70px; }
   .card {
     background: var(--card); border: 1px solid var(--line); border-radius: 16px;
     padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow);
   }
-  .card h2 { font-size: 15px; margin: 0 0 10px; color: var(--sub); font-weight: 600; letter-spacing: .5px; }
+  .card h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; letter-spacing: .5px; }
   .upload {
-    display: block; text-align: center; padding: 26px 12px; cursor: pointer;
+    display: block; text-align: center; padding: 22px 12px; cursor: pointer;
     border: 2px dashed #c6cfdd; border-radius: 14px; color: var(--sub); font-size: 17px;
     transition: border-color .15s, background .15s, color .15s;
   }
   .upload:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
   .upload:active { transform: scale(.995); }
-  .upload.small { padding: 13px 8px; font-size: 14px; border-radius: 10px; }
+  .upload.small { padding: 11px 8px; font-size: 13.5px; border-radius: 10px; }
   input[type=file] { display: none; }
-  .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
-  .meta b { font-size: 19px; }
-  .dim { color: var(--sub); font-size: 13px; }
-  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
-  .chip {
-    flex: 0 0 auto; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line);
-    background: var(--card); font-size: 14px; cursor: pointer; white-space: nowrap;
-    transition: border-color .15s, color .15s, background .15s;
-  }
-  .chip:hover { border-color: var(--accent); color: var(--accent); }
-  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-  .row {
-    display: grid; grid-template-columns: 28px 1fr 104px 26px; gap: 8px; align-items: center;
-    padding: 10px 0; border-bottom: 1px solid var(--line);
-  }
-  .row:last-child { border-bottom: none; }
-  input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
-  .row input[type=number], .row select, input.f, select.f {
-    width: 100%; font-size: 16px; padding: 8px 10px; border: 1px solid var(--line);
-    border-radius: 9px; background: #fbfcfe; color: var(--ink);
+  .frow { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .frow label { color: var(--sub); font-size: 14px; }
+  input.f, select.f {
+    width: 100%; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line);
+    border-radius: 10px; background: #fbfcfe; color: var(--ink);
     transition: border-color .15s, box-shadow .15s;
   }
-  .row input[type=number]:focus, .row select:focus, input.f:focus, select.f:focus {
-    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
-    background: #fff;
+  input.f:focus, select.f:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff;
   }
-  select.f, input.f { padding: 10px 12px; }
-  .unit { color: var(--sub); font-size: 13px; margin-left: 3px; }
-  .nm { word-break: break-all; font-size: 15px; }
-  .tag {
-    display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 999px;
-    background: var(--accent-soft); color: var(--accent); margin-right: 4px; vertical-align: 1px;
+  .slots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (min-width: 760px) { .slots { grid-template-columns: repeat(4, 1fr); } }
+  .slot {
+    border: 1px solid var(--line); border-radius: 14px; padding: 11px; background: #fbfcfe;
+    transition: border-color .15s, background .15s;
   }
-  .tag.rec { background: #fff2dc; color: var(--warn); }
-  .tag.dy { background: #f3e8ff; color: #7048e8; }
-  .tag.unk { background: #f1f3f5; color: #868e96; }
-  .roll { color: var(--sub); font-size: 13px; text-align: right; }
-  .roll b { color: var(--accent); }
-  .row.off .nm, .row.off .roll { opacity: .4; }
-  .row.base { background: #f7f9ff; border-radius: 10px; padding-left: 8px; padding-right: 8px; }
-  .row.base .nm::after { content: "主词条候选"; color: #94a3b8; font-size: 11px; margin-left: 6px; }
-  .score { display: flex; align-items: center; gap: 18px; }
-  .score .big { font-size: 48px; font-weight: 800; color: var(--accent); letter-spacing: -.5px; }
-  .grade { font-size: 15px; padding: 4px 14px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-  .grade.g3 { background: var(--ok-soft); color: var(--ok); }
-  .grade.g1 { background: #feeaea; color: var(--danger); }
-  .others { color: var(--sub); font-size: 13px; margin-top: 10px; line-height: 1.8; }
-  .others b { color: var(--ink); }
-  .del { border: none; background: none; color: #adb5bd; font-size: 17px; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .slot.done { border-color: #b6d4c3; background: #f7fcf9; }
+  .slot h3 { margin: 0 0 8px; font-size: 14.5px; display: flex; justify-content: space-between; align-items: baseline; }
+  .slot h3 .dim { color: var(--sub); font-size: 12px; font-weight: 400; }
+  .slot h3 .ok { color: var(--ok); font-size: 12px; font-weight: 600; }
+  .sub { display: grid; grid-template-columns: 22px 1fr 84px 20px; gap: 5px; align-items: center;
+         padding: 4px 0; font-size: 13.5px; border-bottom: 1px dashed var(--line); }
+  .sub:last-child { border-bottom: none; }
+  .sub input[type=number] { width: 100%; font-size: 13.5px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  .sub input[type=number]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .sub input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .sub .nm { word-break: break-all; }
+  .sub.off { opacity: .4; }
+  .sub .tag { display: inline-block; font-size: 10.5px; padding: 0 6px; border-radius: 999px;
+              background: var(--accent-soft); color: var(--accent); margin-right: 3px; vertical-align: 1px; }
+  .sub .tag.rec { background: #fff2dc; color: var(--warn); }
+  .sub .tag.dy { background: #f3e8ff; color: #7048e8; }
+  .sub .tag.base { background: #fff2dc; color: var(--warn); }
+  .sub select { width: 100%; font-size: 13.5px; padding: 6px 7px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  .mainpick { display: grid; grid-template-columns: 52px 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .mainpick label { color: var(--warn); font-size: 12.5px; font-weight: 600; }
+  .del { border: none; background: none; color: #adb5bd; font-size: 15px; cursor: pointer; padding: 2px; border-radius: 6px; }
   .del:hover { color: var(--danger); background: #feeaea; }
+  .hint { color: var(--sub); font-size: 12.5px; margin-top: 10px; line-height: 1.6; }
   button.primary {
     width: 100%; padding: 14px; font-size: 16px; font-weight: 600; border: none; border-radius: 12px;
-    background: var(--accent); color: #fff; cursor: pointer; margin-top: 10px;
-    box-shadow: 0 4px 12px rgba(66, 99, 235, .25); transition: background .15s, transform .1s;
+    background: var(--accent); color: #fff; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(66,99,235,.25); transition: background .15s, transform .1s;
   }
   button.primary:hover { background: #3655c9; }
   button.primary:active { transform: scale(.99); }
   button.primary:disabled { opacity: .55; cursor: wait; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 620px) { .grid2 { grid-template-columns: 1fr; } }
-  .frow { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
-  .frow label { color: var(--sub); font-size: 14px; }
-  .slot {
-    border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 12px;
-    background: #fbfcfe; transition: border-color .15s;
-  }
-  .slot:hover { border-color: #c9d4e8; }
-  .slot.done { border-color: #b6d4c3; background: #f7fcf9; }
-  .slot h3 { margin: 0 0 9px; font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; }
-  .slot h3 .dim { font-weight: 400; }
-  .sub { display: grid; grid-template-columns: 24px 1fr 92px 24px; gap: 6px; align-items: center;
-         padding: 5px 0; font-size: 14px; border-bottom: 1px dashed var(--line); }
-  .sub:last-child { border-bottom: none; }
-  .sub input[type=number] { width: 100%; font-size: 14px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
-  .sub input[type=number]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  .sub.off { opacity: .42; }
-  .bigstat { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-top: 6px; }
-  .bigstat b { font-size: 21px; }
+  .score { display: flex; align-items: center; gap: 18px; }
+  .score .big { font-size: 50px; font-weight: 800; color: var(--accent); letter-spacing: -.5px; }
+  .grade { font-size: 15px; padding: 4px 14px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .grade.g3 { background: var(--ok-soft); color: var(--ok); }
+  .grade.g1 { background: #feeaea; color: var(--danger); }
+  .dpsline { color: var(--sub); font-size: 13.5px; margin-top: 8px; }
+  .dpsline b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .ver { color: #94a3b8; font-size: 12px; margin-top: 6px; }
   .panel-tbl { width: 100%; font-size: 13px; border-collapse: collapse; margin-top: 8px; }
   .panel-tbl tr:nth-child(odd) { background: #f8fafc; }
   .panel-tbl td { border-top: 1px solid var(--line); padding: 5px 8px; }
@@ -147,60 +117,18 @@
   .spin { display: inline-block; width: 15px; height: 15px; border: 2px solid currentColor;
     border-top-color: transparent; border-radius: 50%; animation: r 1s linear infinite; vertical-align: -3px; }
   @keyframes r { to { transform: rotate(360deg); } }
-  .hint { color: var(--sub); font-size: 12.5px; margin-top: 10px; line-height: 1.6; }
+  .prog { color: var(--accent); font-weight: 600; }
+  .err { color: var(--danger); font-size: 13px; margin-top: 8px; }
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
-<header>
-  <h1>燕云毕业度计算器<span>本地 OCR · 数据不出本机</span></h1>
-  <div class="tabs">
-    <div class="tab on" data-tab="single" onclick="switchTab('single')">单件滚动评分</div>
-    <div class="tab" data-tab="full" onclick="switchTab('full')">整套毕业率 · 网站引擎</div>
-  </div>
-</header>
-
-<!-- ============ Tab 1：单件滚动评分 ============ -->
-<main id="tab-single">
+<header><h1>燕云毕业度计算器</h1><span>整套 8 件 · 站点同源引擎 · 本地 OCR</span></header>
+<main>
   <div class="card">
-    <label class="upload" id="pick">📷 选择 / 拍摄装备照片
-      <input type="file" id="file" accept="image/*" capture="environment">
-    </label>
-    <div class="hint">斜着拍屏幕也可以，会自动校正；只需拍清词条区域。</div>
-  </div>
-
-  <div class="card" id="pieceCard" style="display:none">
-    <div class="meta">
-      <b id="pName"></b>
-      <span class="dim" id="pTier"></span>
-      <span class="dim" id="pSet"></span>
-      <span class="dim" id="pCraft"></span>
-    </div>
-  </div>
-
-  <div class="card" id="buildCard" style="display:none"><div class="chips" id="chips"></div></div>
-
-  <div class="card" id="affixCard" style="display:none">
-    <div id="rows"></div>
-    <button class="primary" id="addRow">＋ 手动加一条词条</button>
-  </div>
-
-  <div class="card" id="scoreCard" style="display:none">
-    <div class="score">
-      <span class="big" id="scoreNum">—</span>
-      <span class="grade" id="grade"></span>
-    </div>
-    <div class="others" id="others"></div>
-    <div class="hint">毕业度 = 各词条（数值÷110阶满值，封顶100%）按流派权重加权平均；
-      满值表在仓库 data/affix_max.json，欢迎校对补充。</div>
-  </div>
-</main>
-
-<!-- ============ Tab 2：整套毕业率（网站引擎） ============ -->
-<main id="tab-full" class="hidden">
-  <div class="card">
+    <h2>配置（与游戏内一致）</h2>
     <div class="frow"><label>流派</label><select class="f" id="flowSel"></select></div>
-    <div class="frow"><label>心法（随流派变化）</label><div id="xinfaSlots" style="display:grid; gap:6px"></div></div>
+    <div class="frow"><label>心法</label><div id="xinfaSlots" style="display:grid; gap:8px"></div></div>
     <div class="frow"><label>套装</label><select class="f" id="setName"></select></div>
     <div class="frow"><label>弓决</label>
       <select class="f" id="bowSel">
@@ -210,202 +138,52 @@
       </select></div>
     <div class="frow"><label>武库</label>
       <select class="f" id="armorySel"><option value="本系">本系</option><option value="通用">通用</option></select></div>
-    <div class="hint">心法与套装请与游戏内配置一致；流派下拉来自管理器数据（含基准版本）。</div>
+    <div class="hint">心法槽位规则来自管理器站点：固定槽不可改，可选槽按下拉更换。</div>
   </div>
 
   <div class="card">
-    <div class="grid2" id="slotGrid"></div>
-    <div class="hint">每个部位拍一张（拍清词条即可），识别后可改数值；主词条下拉可选基础属性行。</div>
+    <h2>装备照片（识别后可修改）<span class="prog" id="prog"></span></h2>
+    <label class="upload" id="batchPick">📷 一次选择多张装备照片（每部位一张）
+      <input type="file" id="batchFile" accept="image/*" multiple>
+    </label>
+    <div class="slots" id="slotGrid"></div>
+    <div class="hint">也可以单独重拍某一格。识别会自动按部位（冠胄/胸甲/胫甲/腕甲/环/佩/武器）分配到对应格。</div>
   </div>
 
   <div class="card">
     <button class="primary" id="calcBtn">🧮 计算整套毕业率（网站同款引擎）</button>
-    <div id="gradOut" style="display:none">
+    <div class="err" id="gradErr"></div>
+    <div id="gradOut" class="hidden">
       <div class="score" style="margin-top:12px">
         <span class="big" id="gradNum">—</span>
         <span class="grade" id="gradGrade"></span>
       </div>
-      <div class="bigstat" id="gradDps"></div>
-      <div class="dim" id="gradVersion"></div>
-      <details style="margin-top:8px"><summary class="dim">聚合面板（引擎输出）</summary>
-        <table class="panel-tbl" id="panelTbl"></table></details>
+      <div class="dpsline" id="gradDps"></div>
+      <div class="ver" id="gradVersion"></div>
+      <table class="panel-tbl" id="panelTbl"></table>
     </div>
-    <div id="gradErr" class="hint" style="color:#c92a2a"></div>
   </div>
 </main>
-
 <div class="toast" id="toast"></div>
 
 <script>
 const $ = id => document.getElementById(id);
-const state = {
-  affixes: [], builds: {}, maxTable: {}, sel: "__auto__",   // tab1
-  engine: null,                                              // tab2
-  flow: "", xinfa: [],   // 由引擎 meta 按流派填充（4 槽）
-  slots: {},                                                 // tab2: slot -> {piece, affixes, baseStats, mainUid}
-};
 const SLOT_LABELS = {
   weapon1: "武器1", weapon2: "武器2", head: "冠胄", chest: "胸甲",
   ring: "环", pendant: "佩", legs: "胫甲", hands: "腕甲",
 };
+const state = { engine: null, flow: "", xinfa: [], slots: {}, busy: false };
 let uidSeq = 1;
 const newUid = () => "r" + uidSeq++;
+const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
-function toast(msg, ms = 2600) {
+function toast(msg, ms = 2800) {
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
   clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), ms);
 }
 
-function switchTab(name) {
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.tab === name));
-  $("tab-single").classList.toggle("hidden", name !== "single");
-  $("tab-full").classList.toggle("hidden", name !== "full");
-  if (name === "full") loadEngineMeta();
-}
-
-/* ================= Tab 1：单件滚动评分 ================= */
-function weightFor(name, weights) {
-  if (name in weights) return weights[name];
-  let best = null;
-  for (const k in weights)
-    if (k && (name.endsWith(k) || k.endsWith(name)))
-      best = best === null ? weights[k] : Math.max(best, weights[k]);
-  return best === null ? 0 : best;
-}
-function rollOf(a) {
-  const mx = state.maxTable[a.name];
-  if (!mx) return { roll: null, base: false };
-  if (a.value > mx * 1.3) return { roll: null, base: true };
-  return { roll: Math.min(100, a.value / mx * 100), base: false };
-}
-function computeFor(weights) {
-  let num = 0, den = 0;
-  for (const a of state.affixes) {
-    if (!a.include) continue;
-    const w = weightFor(a.name, weights);
-    if (w <= 0) continue;
-    const { roll, base } = rollOf(a);
-    if (roll === null || base) continue;
-    num += w * roll; den += w;
-  }
-  return den ? Math.round(num / den * 10) / 10 : null;
-}
-function gradeOf(s) {
-  if (s === null) return { g: "—", cls: "" };
-  if (s >= 90) return { g: "毕业", cls: "g3" };
-  if (s >= 80) return { g: "准毕业", cls: "" };
-  if (s >= 70) return { g: "可用", cls: "" };
-  return { g: "过渡", cls: "g1" };
-}
-function render() {
-  const has = state.affixes.length > 0;
-  ["pieceCard", "buildCard", "affixCard", "scoreCard"].forEach(id =>
-    $(id).style.display = has ? "" : "none");
-  if (!has) return;
-  const rows = $("rows"); rows.innerHTML = "";
-  for (const a of state.affixes) {
-    const w = state.sel === "__auto__" ? null : weightFor(a.name, state.builds[state.sel]);
-    const { roll, base } = rollOf(a);
-    const div = document.createElement("div");
-    div.className = "row" + (a.include ? "" : " off") + (base ? " base" : "");
-    const tags = (a.converted ? '<span class="tag">转</span>' : "") +
-                 (a.recommended ? '<span class="tag rec">荐</span>' : "") +
-                 (a.dingyin ? '<span class="tag dy">定音</span>' : "") +
-                 (a.known ? "" : '<span class="tag" style="background:#f1f3f5;color:#868e96">未识别</span>');
-    const weightTxt = base ? "基础属性·已排除"
-      : (roll === null ? (a.include ? "缺满值" : "") : Math.round(roll) + "%");
-    div.innerHTML =
-      `<input type="checkbox" ${a.include ? "checked" : ""}>` +
-      `<div class="nm">${tags}${a.name}` +
-        `<div class="roll">${weightTxt}${w === null ? "" : " · 权重" + w}</div></div>` +
-      `<div><input type="number" step="0.1" value="${a.value}"><span class="unit">${a.unit === "percent" ? "%" : ""}</span></div>` +
-      `<button class="del" title="删除">✕</button>`;
-    const [chk, , valBox, del] = div.children;
-    const numIn = valBox.querySelector("input");
-    chk.onchange = () => { a.include = chk.checked; render(); };
-    numIn.oninput = () => { const v = parseFloat(numIn.value); if (!isNaN(v)) { a.value = v; refreshScoreOnly(); } };
-    del.onclick = () => { state.affixes = state.affixes.filter(x => x !== a); render(); };
-    rows.appendChild(div);
-  }
-  refreshScoreOnly();
-}
-function refreshScoreOnly() {
-  if (state.sel === "__auto__") {
-    let lines = [];
-    for (const name in state.builds) {
-      const s = computeFor(state.builds[name]);
-      if (s !== null) lines.push([name, s]);
-    }
-    lines.sort((x, y) => y[1] - x[1]);
-    if (lines.length) {
-      const g = gradeOf(lines[0][1]);
-      $("scoreNum").textContent = lines[0][1].toFixed(1);
-      $("grade").textContent = `${g.g} · 最适配：${lines[0][0]}`;
-      $("grade").className = "grade " + g.cls;
-      $("others").innerHTML = "全部流派：" + lines.map(l => `${l[0]} <b>${l[1]}</b>`).join("　");
-    } else { $("scoreNum").textContent = "—"; $("grade").textContent = "无法计算"; }
-  } else {
-    const s = computeFor(state.builds[state.sel]);
-    const g = gradeOf(s);
-    $("scoreNum").textContent = s === null ? "—" : s.toFixed(1);
-    $("grade").textContent = g.g;
-    $("grade").className = "grade " + g.cls;
-    $("others").textContent = "";
-  }
-}
-function renderChips() {
-  const c = $("chips"); c.innerHTML = "";
-  const mk = (key, label) => {
-    const b = document.createElement("button");
-    b.className = "chip" + (state.sel === key ? " on" : "");
-    b.textContent = label;
-    b.onclick = () => { state.sel = key; renderChips(); render(); };
-    c.appendChild(b);
-  };
-  mk("__auto__", "🎯 自动对比");
-  for (const name of Object.keys(state.builds)) mk(name, name);
-}
-async function analyze(file) {
-  const fd = new FormData(); fd.append("image", file);
-  $("pick").innerHTML = '<span class="spin"></span> 正在本机识别…（约几秒）';
-  try {
-    const r = await fetch("/api/analyze", { method: "POST", body: fd });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || "识别失败");
-    const p = d.piece;
-    $("pName").textContent = p.name || "（未识别装备名）";
-    $("pTier").textContent = p.tier || "";
-    $("pSet").textContent = p.set_name || "";
-    $("pCraft").textContent = p.craft_score ? "造诣 " + p.craft_score : "";
-    state.maxTable = d.max_table;
-    state.builds = d.builds;
-    state.affixes = d.affixes.map(a => ({ ...a, include: true }));
-    if (!state.affixes.length) toast("没识别出词条，换个角度/亮度再拍一张试试");
-    renderChips(); render();
-  } catch (e) {
-    toast(e.message.includes("Failed to fetch") ? "服务未启动，请先运行 python -m yanyun_gradecalc.web" : e.message, 4000);
-  } finally {
-    $("pick").innerHTML = '📷 选择 / 拍摄装备照片<input type="file" id="file" accept="image/*" capture="environment">';
-    bindFile();
-  }
-}
-let _fileBound = false;
-function bindFile() {
-  const f = $("file");
-  if (!f || _fileBound) return;
-  _fileBound = true;
-  f.onchange = () => { if (f.files[0]) analyze(f.files[0]); f.value = ""; };
-}
-bindFile();
-$("addRow").onclick = () => {
-  state.affixes.push({ name: "自定义词条", raw_name: "", value: 0, unit: "percent",
-                       converted: false, recommended: false, dingyin: false, known: false, include: true });
-  render();
-};
-
-/* ================= Tab 2：整套毕业率（网站引擎） ================= */
+/* ---------- 引擎元数据：流派 / 心法槽位 / 套装 ---------- */
 async function loadEngineMeta() {
-  if (state.engine) { fillFlow(); return; }
   try {
     const r = await fetch("/api/engine");
     const d = await r.json();
@@ -417,42 +195,19 @@ async function loadEngineMeta() {
       const o = document.createElement("option");
       o.value = f; o.textContent = f;
       const rot = (d.classRotationStats || {})[f];
-      if (rot) o.textContent += `（${rot.version || ""}）`;
+      if (rot && rot.version) o.textContent += `（${rot.version.replace("110阶竞速轴属性毕业率进阶计算器", " ")}）`;
       sel.appendChild(o);
     }
-    sel.onchange = () => { state.flow = sel.value; applyXinfaDefaults(); };
+    sel.onchange = () => { state.flow = sel.value; renderXinfa(); };
     state.flow = sel.value || "";
-    renderSetOptions();
-    applyXinfaDefaults();
+    renderSets();
+    renderXinfa();
   } catch (e) {
-    toast("引擎不可用：" + e.message + "（需要安装 Node.js 并在仓库根目录运行）", 5000);
+    toast("引擎不可用：" + e.message + "（需安装 Node.js，并在仓库根目录运行）", 5000);
   }
 }
-function applyXinfaDefaults() {
-  // 心法槽位规则完全来自站点：meta.xinfa[flow] = {default:[4], choices:[每槽候选，空=锁定]}
-  const rule = (state.engine.xinfa || {})[state.flow] || { default: ["", "", "", ""], choices: [[], [], [], []] };
-  state.xinfa = [...rule.default];
-  const box = $("xinfaSlots"); box.innerHTML = "";
-  rule.default.forEach((name, i) => {
-    const cands = [...new Set(rule.choices[i] || [])];  // 去重
-    const locked = cands.length === 0;
-    const row = document.createElement("div");
-    row.className = "frow";
-    row.style.margin = "0";
-    if (locked) {
-      row.innerHTML = `<label>槽${i + 1}（固定）</label><div class="f" style="padding:7px 10px;background:#f1f3f6;border-radius:8px">${name || "—"}</div>`;
-      box.appendChild(row);
-    } else {
-      const opts = cands.map(c => `<option value="${c}" ${c === name ? "selected" : ""}>${c}</option>`).join("");
-      row.innerHTML = `<label>槽${i + 1}</label><select class="f">${opts}</select>`;
-      const sel = row.querySelector("select");
-      sel.onchange = () => { state.xinfa[i] = sel.value; };
-      box.appendChild(row);
-    }
-  });
-}
 
-function renderSetOptions() {
+function renderSets() {
   const sel = $("setName"); sel.innerHTML = "";
   const empty = document.createElement("option");
   empty.value = ""; empty.textContent = "（不指定套装）";
@@ -465,10 +220,34 @@ function renderSetOptions() {
       o.textContent += `（主词条 ${Object.entries(bonus).map(([k, v]) => k + "+" + v).join("、")}）`;
     sel.appendChild(o);
   }
-  sel.onchange = () => {};
 }
+
+function renderXinfa() {
+  const rule = (state.engine.xinfa || {})[state.flow] || { default: ["", "", "", ""], choices: [[], [], [], []] };
+  state.xinfa = [...rule.default];
+  const box = $("xinfaSlots"); box.innerHTML = "";
+  rule.default.forEach((name, i) => {
+    const cands = [...new Set(rule.choices[i] || [])];
+    const locked = cands.length === 0;
+    const row = document.createElement("div");
+    row.className = "frow"; row.style.margin = "0";
+    if (locked) {
+      row.innerHTML = `<label>槽${i + 1}（固定）</label>` +
+        `<div class="f" style="padding:8px 12px;background:#f1f3f6;border-radius:9px">${esc(name || "—")}</div>`;
+      box.appendChild(row);
+    } else {
+      const opts = cands.map(c => `<option value="${c}" ${c === name ? "selected" : ""}>${esc(c)}</option>`).join("");
+      row.innerHTML = `<label>槽${i + 1}</label><select class="f">${opts}</select>`;
+      row.querySelector("select").onchange = e => { state.xinfa[i] = e.target.value; };
+      box.appendChild(row);
+    }
+  });
+}
+
+/* ---------- 部位格 ---------- */
 function buildSlotGrid() {
   const g = $("slotGrid"); g.innerHTML = "";
+  state.slots = {};
   for (const key in SLOT_LABELS) {
     const card = document.createElement("div");
     card.className = "slot"; card.id = "slot-" + key;
@@ -480,26 +259,44 @@ function buildSlotGrid() {
     inp.onchange = () => { if (inp.files[0]) analyzeSlot(key, inp.files[0]); inp.value = ""; };
   }
 }
+
+function updateProg() {
+  const n = Object.keys(state.slots).length;
+  $("prog").textContent = n ? `已识别 ${n}/8` : "";
+}
+
 async function analyzeSlot(key, file) {
   const up = $("sl-up-" + key);
   up.innerHTML = '<span class="spin"></span> 识别中…';
   try {
-    const fd = new FormData(); fd.append("image", file);
-    const r = await fetch("/api/analyze", { method: "POST", body: fd });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || "识别失败");
-    const rows = [...d.base_stats.map(b => ({ ...b, isBase: true })),
-                  ...d.affixes.map(a => ({ ...a, isBase: false }))];
-    rows.forEach(r => { r.uid = newUid(); r.include = true; });
-    state.slots[key] = { piece: d.piece, rows, mainUid: pickMainUid(key, rows) };
-    $("sl-info-" + key).textContent = `${d.piece.name || ""} ${d.piece.craft_score ? "造诣" + d.piece.craft_score : ""}`;
-    renderSlot(key);
+    const d = await analyzeFile(file);
+    fillSlot(key, d);
   } catch (e) {
     toast(key + " 识别失败：" + e.message);
   } finally {
     up.innerHTML = "📷 重拍/重选";
+    updateProg();
   }
 }
+
+async function analyzeFile(file) {
+  const fd = new FormData(); fd.append("image", file);
+  const r = await fetch("/api/analyze", { method: "POST", body: fd });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || "识别失败");
+  return d;
+}
+
+function fillSlot(key, d) {
+  const rows = [...d.base_stats.map(b => ({ ...b, isBase: true })),
+                ...d.affixes.map(a => ({ ...a, isBase: false }))];
+  rows.forEach(r => { r.uid = newUid(); r.include = true; });
+  state.slots[key] = { piece: d.piece, rows, mainUid: pickMainUid(key, rows) };
+  $("sl-info-" + key).innerHTML = '<span class="ok">✓ 已识别</span>';
+  $("slot-" + key).classList.add("done");
+  renderSlot(key);
+}
+
 function pickMainUid(key, rows) {
   const armor = ["head", "chest", "legs", "hands"].includes(key);
   const prefer = armor ? ["气血最大值"] : ["最大外功攻击", "最大鸣金攻击"];
@@ -509,27 +306,37 @@ function pickMainUid(key, rows) {
   }
   return rows.length ? rows[0].uid : null;
 }
+
 function renderSlot(key) {
   const s = state.slots[key];
   if (!s) return;
-  const body = $("sl-body-" + key);
-  body.innerHTML = "";
-  // 主词条选择
+  const body = $("sl-body-" + key); body.innerHTML = "";
+  const p = s.piece;
+  const cap = document.createElement("div");
+  cap.className = "dim"; cap.style.marginBottom = "6px";
+  cap.textContent = [p.name, p.set_name, p.craft_score ? "造诣" + p.craft_score : ""].filter(Boolean).join(" · ");
+  body.appendChild(cap);
+
   const mainRow = document.createElement("div");
-  mainRow.className = "frow";
-  const opts = s.rows.map(r => `<option value="${r.uid}" ${r.uid === s.mainUid ? "selected" : ""}>${r.name} ${r.value}${r.unit === "percent" ? "%" : ""}</option>`).join("");
-  mainRow.innerHTML = `<label>主词条</label><select class="f">${opts || "<option>（无候选）</option>"}</select>`;
-  const sel = mainRow.querySelector("select");
-  sel.onchange = () => { s.mainUid = sel.value || null; renderSlot(key); };
+  mainRow.className = "mainpick";
+  const opts = s.rows.map(r =>
+    `<option value="${r.uid}" ${r.uid === s.mainUid ? "selected" : ""}>${esc(r.name)} ${r.value}${r.unit === "percent" ? "%" : ""}</option>`).join("");
+  mainRow.innerHTML = `<label>主词条</label><select>${opts || "<option>（无候选）</option>"}</select>`;
+  const msel = mainRow.querySelector("select");
+  msel.onchange = () => { s.mainUid = msel.value || null; renderSlot(key); };
   body.appendChild(mainRow);
-  // 副词条行（排除主词条）
+
   for (const r of s.rows) {
     if (r.uid === s.mainUid) continue;
     const div = document.createElement("div");
     div.className = "sub" + (r.include ? "" : " off");
+    const tags = (r.converted ? '<span class="tag">转</span>' : "") +
+                 (r.dingyin ? '<span class="tag dy">定音</span>' : "") +
+                 (r.recommended ? '<span class="tag rec">荐</span>' : "") +
+                 (r.known ? "" : '<span class="tag" style="background:#f1f3f5;color:#868e96">未识别</span>');
     div.innerHTML =
       `<input type="checkbox" ${r.include ? "checked" : ""}>` +
-      `<div class="nm">${r.name}</div>` +
+      `<div class="nm">${tags}${esc(r.name)}</div>` +
       `<div style="display:flex"><input type="number" step="0.1" value="${r.value}"><span class="unit">${r.unit === "percent" ? "%" : ""}</span></div>` +
       `<button class="del">✕</button>`;
     const [chk, , valBox, del] = div.children;
@@ -540,6 +347,39 @@ function renderSlot(key) {
     body.appendChild(div);
   }
 }
+
+/* ---------- 批量上传：自动按部位分配 ---------- */
+async function analyzeBatch(files) {
+  const list = [...files];
+  for (let i = 0; i < list.length; i++) {
+    $("prog").textContent = `识别中 ${i + 1}/${list.length}…`;
+    try {
+      const d = await analyzeFile(list[i]);
+      const slot = assignAuto(d.suggest, d);
+      if (slot) toast(`${SLOT_LABELS[slot]} ✓ ${d.piece.name || ""}`, 1100);
+    } catch (e) {
+      toast("一张照片识别失败：" + e.message);
+    }
+  }
+  $("prog").textContent = "";
+  updateProg();
+}
+
+function assignAuto(suggest, d) {
+  const target = suggest === "weapon"
+    ? (!state.slots.weapon1 ? "weapon1" : !state.slots.weapon2 ? "weapon2" : "weapon1")
+    : suggest;
+  if (target && SLOT_LABELS[target]) {
+    fillSlot(target, d);
+    return target;
+  }
+  const free = Object.keys(SLOT_LABELS).find(k => !state.slots[k]);
+  if (free) { fillSlot(free, d); return free; }
+  toast("8 个部位已满，多余照片已忽略");
+  return null;
+}
+
+/* ---------- 整套计算 ---------- */
 $("calcBtn").onclick = async () => {
   const equipped = {};
   for (const key in state.slots) {
@@ -568,32 +408,44 @@ $("calcBtn").onclick = async () => {
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || "计算失败");
-    $("gradOut").style.display = "";
+    $("gradOut").classList.remove("hidden");
     const rate = parseFloat(d.graduationRate);
     $("gradNum").textContent = isNaN(rate) ? "—" : rate.toFixed(2) + "%";
     const g = rate >= 90 ? { g: "毕业", cls: "g3" } : rate >= 70 ? { g: "成长中", cls: "" } : { g: "还需打造", cls: "g1" };
     $("gradGrade").textContent = g.g;
     $("gradGrade").className = "grade " + g.cls;
     $("gradDps").innerHTML = `<span>DPS <b>${Math.round(d.dps || 0).toLocaleString()}</b></span>` +
-      `<span>总伤 <b>${Math.round(d.totalDamage || 0).toLocaleString()}</b></span>`;
+      `<span>总伤 <b>${Math.round(d.totalDamage || 0).toLocaleString()}</b></span>` +
+      `<span>心法 <b>${(d.xinfa || []).filter(Boolean).join(" / ")}</b></span>`;
     const v = d.meta && d.meta.version;
     $("gradVersion").textContent = v ? `基准：${v.version || ""}（${v.updateTime || ""}）` : "";
     const panel = d.panel || {};
     $("panelTbl").innerHTML = Object.entries(panel)
       .filter(([k, v]) => typeof v === "number" && !k.startsWith("_"))
-      .map(([k, v]) => `<tr><td>${k}</td><td>${Math.round(v * 1000) / 1000}</td></tr>`).join("");
+      .map(([k, v]) => `<tr><td>${esc(k)}</td><td>${Math.round(v * 1000) / 1000}</td></tr>`).join("");
   } catch (e) {
-    $("gradErr").textContent = "计算失败：" + e.message;
+    $("gradErr").textContent = e.message;
   } finally {
-    btn.disabled = false; btn.textContent = "🧮 计算整套毕业率（网站同款引擎）";
+    btn.disabled = false; btn.innerHTML = "🧮 计算整套毕业率（网站同款引擎）";
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   }
 };
-buildSlotGrid();
 
-/* ================= 公共 ================= */
-fetch("/api/config").then(r => r.json()).then(d => {
-  state.builds = d.builds; state.maxTable = d.max_table; renderChips();
-}).catch(() => toast("无法连接本地服务：请先运行 python -m yanyun_gradecalc.web", 5000));
+/* ---------- 批量文件选择 ---------- */
+function bindBatch() {
+  const f = $("batchFile");
+  f.onchange = async () => {
+    if (!f.files.length || state.busy) { f.value = ""; return; }
+    state.busy = true;
+    await analyzeBatch(f.files);
+    state.busy = false;
+    f.value = "";
+  };
+}
+
+buildSlotGrid();
+bindBatch();
+loadEngineMeta();
 </script>
 </body>
 </html>

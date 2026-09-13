@@ -116,6 +116,20 @@ def test_parse_base_stats_swap_when_defense_bigger():
     assert bs.get("外功防御") == 34.0
 
 
+def test_suggest_slot():
+    from yanyun_gradecalc.ocr import Affix, Piece, suggest_slot
+
+    def piece(slot="", name="", base=()):
+        return Piece(slot=slot, name=name,
+                     base_stats=[Affix(n, n, 1.0, "flat") for n in base])
+
+    assert suggest_slot(piece(slot="冠胄")) == "head"
+    assert suggest_slot(piece(name="雁南飞甲", slot="胸甲")) == "chest"
+    assert suggest_slot(piece(base=("最大外功攻击",))) == "weapon"
+    assert suggest_slot(piece(base=("气血最大值", "外功防御"))) == "armor"
+    assert suggest_slot(piece(name="未知物")) is None
+
+
 # ---------------- build import ----------------
 @pytest.fixture()
 def fake_calc(tmp_path):
