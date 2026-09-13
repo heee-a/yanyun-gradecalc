@@ -46,6 +46,25 @@ ygc score 照片1.jpg 照片2.jpg --build 破竹鸢 --json-out result.json
 ygc recognize 照片.jpg
 ```
 
+## 整套识别 + 心法切换（网页版核心玩法）
+
+网页版按「全套 8 件」组织：武器1/武器2/冠胄/胸甲/胫甲/腕甲/环/佩 各一个拍照格，
+逐格拍完后在页面里**核对主词条、勾选副词条、改数值**，然后：
+
+1. 选**流派**（13 个，与站点同步）；
+2. 选**心法**——第三/第四心法的候选与默认值来自站点数据（如破竹鸢：断石之构/三穷致知 + 易水歌/征人归）；
+3. 选**弓决**（精准/会心/会意）、**套装**、**兵装**（本系/双系）；
+4. 点「计算整套毕业率」→ 返回**与 leoq7 管理器完全同源**的毕业率、DPS、总伤和面板属性
+   （引擎直接加载站点同款 runtime + WASM，计算逻辑 100% 一致）。
+
+整套引擎依赖 Node.js（>=18）与站点运行时文件：
+
+```bash
+node --version              # 需要已安装 Node
+python scripts/fetch_engine.py   # 首次使用下载运行时到 engine/vendor/（约 1.7MB）
+ygc-web                     # 启动网页版
+```
+
 ## 网页版（手机 / 电脑都能用）
 
 不想敲命令行？启动本地网页版（先装 flask：`pip install -e ".[web]"`）：
@@ -107,7 +126,9 @@ yanyun-gradecalc/
 ├── data/affix_max.json   # 110阶词条满值表（来源：yysls.leoq7.com）
 ├── builds/               # 12 个流派（10 个 best40 权重 + 破竹樽/DIY 计算器导入）
 ├── scripts/              # update_from_site.py（站点数据更新）/ api_push.py
-└── tests/                # 18 个测试（网页层不依赖 OCR 模型）
+├── engine/               # 整套毕业率引擎（Node + 站点同款 WASM runtime）
+├── scripts/              # 站点数据同步 / 引擎下载 / API 推送
+└── tests/                # 20 个测试（网页与引擎层不依赖 OCR 模型）
 ```
 
 ## 声明

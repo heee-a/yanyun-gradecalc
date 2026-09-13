@@ -89,6 +89,33 @@ def test_parse_marks_converted_and_unknown():
     assert piece.affixes[1].known is False  # 未收录词条保留原文
 
 
+def test_parse_base_stats_repair_missing_defense():
+    """OCR 漏掉外功防御数值时，气血量级的数值应回正到气血最大值行。"""
+    ocr = [
+        box(310, 320, "装备等阶"),
+        box(310, 400, "气血最大值"), box(920, 470, "9723"),   # 外防数值 34 被 OCR 漏掉
+        box(280, 460, "外功防御"),
+        box(340, 580, "会心率荐"), box(890, 650, "6.6%"),
+    ]
+    piece = parse_ocr_result(ocr)
+    bs = {b.name: b.value for b in piece.base_stats}
+    assert bs.get("气血最大值") == 9723.0
+    assert "外功防御" not in bs or bs["外功防御"] < 500
+    assert any(a.name == "会心率" for a in piece.affixes)
+
+
+def test_parse_base_stats_swap_when_defense_bigger():
+    ocr = [
+        box(310, 400, "气血最大值"), box(920, 470, "34"),
+        box(280, 460, "外功防御"), box(920, 530, "9723"),
+        box(340, 640, "会心率"), box(890, 710, "6.6%"),
+    ]
+    piece = parse_ocr_result(ocr)
+    bs = {b.name: b.value for b in piece.base_stats}
+    assert bs.get("气血最大值") == 9723.0
+    assert bs.get("外功防御") == 34.0
+
+
 # ---------------- build import ----------------
 @pytest.fixture()
 def fake_calc(tmp_path):

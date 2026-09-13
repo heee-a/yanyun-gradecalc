@@ -99,13 +99,14 @@ def main() -> None:
         if head is None:
             raise RuntimeError("远端 refs/heads/main 始终不可见")
         print(f"初始提交 {head[:10]}")
-        files = [f for f in files if f != readme]
-    else:
-        files = changed_files()
+
+    # 全量树模式：不做本地 diff（远端提交对象不在本地对象库），
+    # 直接以全部跟踪文件重建完整树，父提交指向远端 HEAD。
+    files = tracked_files()
 
     tree_entries = blob_tree_entries(files)
     print(f"上传 blob {len(tree_entries)} 个")
-    tree = api("POST", "/git/trees", {"base_tree": head, "tree": tree_entries})
+    tree = api("POST", "/git/trees", {"tree": tree_entries})
     msg = subprocess.check_output(
         ["git", "-c", "core.quotepath=false", "log", "-1", "--pretty=%B", "HEAD"],
         text=True, encoding="utf-8")

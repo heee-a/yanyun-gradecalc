@@ -17,3 +17,6 @@ source_data/
 shots/
 outputs/
 builds/*_private.json
+
+# 站点运行时（他人物料，用 scripts/fetch_engine.py 按需下载，不入库）
+engine/vendor/

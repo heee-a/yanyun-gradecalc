@@ -49,6 +49,7 @@ class Piece:
     tier: str = ""            # 装备等阶，如 110阶
     set_name: str = ""        # 套装，如 易相套装4/4
     affixes: list[Affix] = field(default_factory=list)
+    base_stats: list[Affix] = field(default_factory=list)  # 基础属性行（气血/外防等，供主词条选择）
 
 
 # 配对后要从词条里剔除的界面/基础属性行（仍参与对齐占位）
@@ -156,8 +157,15 @@ def parse_ocr_result(result, source: str = "") -> Piece:
     used_texts = set()
     for n, v in pairs:
         used_texts.add(n["text"])
-        if any(w in n["text"] for w in _UI_WORDS):
-            continue  # 基础属性/界面行
+        raw_ui = n["text"]
+        if any(w in raw_ui for w in _UI_WORDS):
+            # 基础属性/界面行：保留到 base_stats，供网页端选择主词条
+            val, unit = parse_value(v["text"])  # type: ignore[misc]
+            core = clean_ui_name(raw_ui)
+            std = normalize_stat(core)
+            piece.base_stats.append(Affix(name=std or core, raw_name=raw_ui, value=val,
+                                          unit=unit, known=std is not None))
+            continue
         raw = n["text"]
         is_dingyin = any(m in raw for m in ("◆", "✦", "♦", "❖", "◇"))
         core, is_conv, is_rec = split_affix_marker(
@@ -187,7 +195,24 @@ def parse_ocr_result(result, source: str = "") -> Piece:
         t = b["text"]
         if t in _SLOT_WORDS and t != piece.name:
             piece.slot = piece.slot or t
+    _repair_base_stats(piece)
     return piece
+
+
+def _repair_base_stats(piece: Piece) -> None:
+    """修复基础属性行的经典错位。
+
+    斜拍照片里“外功防御”的小数值（几十）常被 OCR 漏掉，随后 DP 会把气血
+    最大值的数值（数千）错配到外功防御行。利用游戏量级语义检测并回正：
+    气血永远远大于防御；两行都在但防御>气血时按互换处理。
+    """
+    hp = next((b for b in piece.base_stats if b.name == "气血最大值"), None)
+    de = next((b for b in piece.base_stats if b.name == "外功防御"), None)
+    if hp is None and de is not None and de.value >= 500:
+        de.name = "气血最大值"
+        de.known = True
+    elif hp is not None and de is not None and de.value > hp.value:
+        hp.value, de.value = de.value, hp.value
 
 
 def _extract_metadata(piece: Piece, boxes) -> None:
@@ -294,6 +319,12 @@ def _align(names: list[dict], values: list[dict]) -> list[tuple[dict, dict]]:
         i, k = pi, pk
     pairs.reverse()
     return pairs
+
+
+def clean_ui_name(text: str) -> str:
+    """UI 行名清洗：去掉“要求”后缀（体魄要求 -> 体魄），其余原样保留。"""
+    t = str(text).strip()
+    return t[:-2] if t.endswith("要求") else t
 
 
 def _has_cjk(text: str) -> bool:
