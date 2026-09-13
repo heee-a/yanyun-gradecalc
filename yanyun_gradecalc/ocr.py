@@ -105,18 +105,12 @@ def recognize_image(data: bytes, max_side: int = 2200) -> Piece:
 
     对暗光/斜拍照片自动做多轮识别：原图、CLAHE 局部对比度增强、
     亮度拉伸各识别一次，选“已知词条最多”的结果；足够好时提前结束。
+    若首轮效果差，自动旋转 90/180/270 度重试（EXIF 缺失的手机照片兜底）。
     """
     import cv2
     import numpy as np
 
-    buf = np.frombuffer(data, dtype=np.uint8)
-    img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
-    if img is None:
-        raise ValueError("无法解码图片，请换一张（支持 jpg/png/webp）")
-    h, w = img.shape[:2]
-    scale = max_side / max(h, w)
-    if scale < 1:
-        img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+    img = _decode_upright(data, max_side)
 
     def quality(piece: Piece) -> tuple:
         return (sum(1 for a in piece.affixes if a.known),
@@ -124,17 +118,42 @@ def recognize_image(data: bytes, max_side: int = 2200) -> Piece:
                 1 if piece.craft_score else 0)
 
     best: tuple[tuple, Piece] | None = None
-    for variant in _enhance_variants(img):
-        result, _ = _get_ocr()(variant)
-        piece = parse_ocr_result(result or [], source="upload")
-        q = quality(piece)
-        if best is None or q > best[0]:
-            best = (q, piece)
-        if q[0] >= 4:  # 已识别出足够多的已知词条，无需更多轮
+    # 四个朝向各跑一轮增强变体：正常照片第 0 轮即达标提前结束；
+    # EXIF 缺失/横竖屏颠倒的照片由后续轮次兜底
+    for rotation in range(4):
+        rotated = img if rotation == 0 else np.rot90(img, k=rotation)
+        for variant in _enhance_variants(rotated):
+            result, _ = _get_ocr()(variant)
+            piece = parse_ocr_result(result or [], source="upload")
+            q = quality(piece)
+            if best is None or q > best[0]:
+                best = (q, piece)
+            if q[0] >= 4:  # 已识别出足够多的已知词条，无需更多轮
+                break
+        if best is not None and best[0][0] >= 4:
             break
-    piece = best[1]
+    piece = best[1] if best else parse_ocr_result([], source="upload")
     piece.source = "upload"
     return piece
+
+
+def _decode_upright(data: bytes, max_side: int = 2200) -> np.ndarray:
+    """解码图片：EXIF 方向转正（手机照片常见）+ 大边长降采样。
+
+    cv2.imdecode 会忽略 EXIF 方向，故改用 PIL 解码。
+    """
+    import io
+
+    import numpy as np
+    from PIL import Image, ImageOps
+
+    pil = Image.open(io.BytesIO(data))
+    pil = ImageOps.exif_transpose(pil).convert("RGB")
+    w, h = pil.size
+    scale = max_side / max(w, h)
+    if scale < 1:
+        pil = pil.resize((round(w * scale), round(h * scale)), Image.LANCZOS)
+    return np.asarray(pil)[:, :, ::-1]      # RGB -> BGR，供 cv2 增强变体使用
 
 
 def _enhance_variants(img):
