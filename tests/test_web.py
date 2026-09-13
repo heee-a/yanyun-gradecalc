@@ -18,7 +18,7 @@ def test_config_has_builds_and_max_table():
     c = app.test_client()
     data = c.get("/api/config").get_json()
     assert "破竹樽" in data["builds"] and "裂石威" in data["builds"]
-    assert data["max_table"]["最大外功攻击"] == 116.3
+    assert data["max_table"]["最大外功攻击"] == 105.6
 
 
 def test_analyze_requires_image():

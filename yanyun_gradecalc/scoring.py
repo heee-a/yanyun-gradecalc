@@ -66,8 +66,11 @@ def affix_roll(affix: Affix, max_table: dict) -> tuple[float | None, bool]:
 
     数值超过满值 1.3 倍视为基础属性行（词条滚动不可能超过满值），
     返回 (None, True) 表示“疑似基础属性，已排除”。
+    指定武学技能类特技（如 无名剑法·蓄力技增伤）用“指定武学技能增伤”满值兜底。
     """
     max_val = max_table.get(affix.name)
+    if not max_val and ("技增伤" in affix.name or "技能增伤" in affix.name):
+        max_val = max_table.get("指定武学技能增伤")
     if not max_val or max_val <= 0:
         return None, False
     if affix.value > max_val * 1.3:
@@ -129,6 +132,7 @@ def format_report(score: PieceScore) -> str:
         mark = "✓" if d.relevant else "·"
         unit = "%" if d.affix.unit == "percent" else ""
         conv = "[转]" if d.affix.converted else ""
+        dy = "[定音]" if d.affix.dingyin else ""
         if d.base_stat:
             val = f"{d.affix.value}{unit}（疑似基础属性行，已排除）"
         elif d.roll is None and d.relevant:
@@ -137,7 +141,7 @@ def format_report(score: PieceScore) -> str:
             val = f"{d.affix.value}{unit}"
         else:
             val = f"{d.affix.value}{unit}（{d.roll:.0f}%）"
-        lines.append(f"   {mark} {conv}{d.affix.name}: {val}  权重{d.weight:g}")
+        lines.append(f"   {mark} {conv}{dy}{d.affix.name}: {val}  权重{d.weight:g}")
     if score.score is None:
         lines.append(f"   毕业度: 无法计算（该流派关注词条均缺满值）")
     else:

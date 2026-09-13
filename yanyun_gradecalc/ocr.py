@@ -34,8 +34,9 @@ class Affix:
     raw_name: str        # OCR 原文拼接
     value: float
     unit: str            # flat / percent
-    converted: bool = False   # [转] 词条
+    converted: bool = False   # [转]（转律）词条
     recommended: bool = False  # 带 荐 标记
+    dingyin: bool = False     # 定音词条（原文带 ◆ 等菱形标记）
     known: bool = True   # 能否归一化到词条字典
 
 
@@ -59,8 +60,8 @@ _UI_WORDS = ("装备等阶", "气血最大值", "外功防御", "耐久度", "�
 _ANCHOR_WORDS = ("气血最大值", "外功防御", "耐久度", "穿戴等级", "体魄要求",
                  "协调要求", "博学要求", "装备等阶", "造诣", "造谐")
 _NOISE_PAIR_PENALTY = 150.0  # 非锚点 UI 名（套装名等）参与配对的罚分，防止吸走数值
-_SLOT_WORDS = ("冠胄", "胸甲", "护腕", "腰带", "护腿", "鞋子", "项链", "戒指",
-               "武器", "护手", "坠饰")
+_SLOT_WORDS = ("冠胄", "胸甲", "胫甲", "腕甲", "环", "佩",
+               "剑", "枪", "伞", "扇", "绳标", "双刀", "陌刀", "横刀", "拳甲", "鼓")
 _INF = float("inf")
 _SKIP_COST = 90.0     # 跳过一个名字的代价（须低于一次明显错配的偏差代价）
 _VSKIP = 300.0        # 跳过一个数值的代价（杂散数字，能配则配）
@@ -158,12 +159,15 @@ def parse_ocr_result(result, source: str = "") -> Piece:
         if any(w in n["text"] for w in _UI_WORDS):
             continue  # 基础属性/界面行
         raw = n["text"]
-        core, is_conv, is_rec = split_affix_marker(raw.replace("[", "").replace("]", ""))
+        is_dingyin = any(m in raw for m in ("◆", "✦", "♦", "❖", "◇"))
+        core, is_conv, is_rec = split_affix_marker(
+            raw.replace("[", "").replace("]", "")
+            .replace("◆", "").replace("✦", "").replace("♦", "").replace("❖", ""))
         std = normalize_stat(core)
         val, unit = parse_value(v["text"])  # type: ignore[misc]
         piece.affixes.append(Affix(name=std or core, raw_name=raw, value=val,
                                    unit=unit, converted=is_conv, recommended=is_rec,
-                                   known=std is not None))
+                                   dingyin=is_dingyin, known=std is not None))
 
     # 装备名/部位：最上方的未占用中文框（至少 2 个汉字、非“荐”角标）
     for b in sorted(boxes, key=lambda b: b["y"]):

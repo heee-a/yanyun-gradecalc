@@ -220,6 +220,8 @@ def test_grade_thresholds():
 
 # ---------------- repo data ----------------
 def test_repo_max_table_loads():
+    # 满值表由用户在游戏内持续校对，测试只做结构性断言，不锁定具体数值
     t = load_max_table()
-    assert t["最大外功攻击"] == 116.3
-    assert t["会意率"] == 7.0
+    assert t["最大外功攻击"] > 0
+    assert t["会意率"] > 0 and t["会心率"] > 0
+    assert t["外功穿透"] > 0

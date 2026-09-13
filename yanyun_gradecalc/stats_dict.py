@@ -31,11 +31,29 @@ CANONICAL_STATS: dict[str, dict] = {
     # 增伤类（百分比）
     "对首领单位增伤": {"type": "percent", "aliases": ["对首领单位增伤", "首领增伤", "对首领增伤"]},
     "伤害加成": {"type": "percent", "aliases": ["伤害加成"]},
-    "全武器增伤": {"type": "percent", "aliases": ["全武器增伤", "全武增"]},
+    "全武学增效": {"type": "percent", "aliases": ["全武学增效", "全武器增伤", "全武增"]},
     "会心伤害": {"type": "percent", "aliases": ["会心伤害"]},
     "会意伤害": {"type": "percent", "aliases": ["会意伤害"]},
-    # 武学特技类（百分比），如 无名剑法·蓄力技增伤 —— 归一化时按“*增伤”动态识别
+    # 武学特技类（百分比），如 无名剑法·蓄力技增伤 —— 归一化时按“*增伤/*增效”动态识别
 }
+
+# —— 属性攻击与增效类词条（依 yysls.leoq7.com 管理器数据补全） ——
+for _school in ("裂石", "牵丝", "破竹", "无相", "鸣金"):
+    CANONICAL_STATS[f"最小{_school}攻击"] = {"type": "flat", "aliases": [f"最小{_school}攻击"]}
+    CANONICAL_STATS[f"最大{_school}攻击"] = {"type": "flat", "aliases": [f"最大{_school}攻击"]}
+for _w in ("剑", "枪", "伞", "扇", "绳标", "双刀", "陌刀", "横刀", "拳甲", "鼓"):
+    CANONICAL_STATS[f"{_w}武学增效"] = {"type": "percent", "aliases": [f"{_w}武学增效", f"{_w}增"]}
+CANONICAL_STATS.update(
+    {
+        "属攻穿透": {"type": "flat", "aliases": ["属攻穿透"]},
+        "无相穿透": {"type": "flat", "aliases": ["无相穿透"]},
+        "全武学增效": {"type": "percent", "aliases": ["全武学增效", "全武增效", "全武器增伤"]},
+        "单体类奇术增伤": {"type": "percent", "aliases": ["单体类奇术增伤", "单体奇术增伤"]},
+        "群体类奇术增伤": {"type": "percent", "aliases": ["群体类奇术增伤", "群体奇术增伤"]},
+        "指定武学技能增伤": {"type": "percent", "aliases": ["指定武学技能增伤"]},
+        "对玩家单位增效": {"type": "percent", "aliases": ["对玩家单位增效", "对玩家增伤"]},
+    }
+)
 
 _PANEL_TO_AFFIX: dict[str, list[str]] = {
     # 计算器输入区面板属性 -> 对应装备词条
@@ -52,7 +70,7 @@ _PANEL_TO_AFFIX: dict[str, list[str]] = {
     "会心伤害加成": ["会心伤害"],
     "会意伤害加成": ["会意伤害"],
     "首领增": ["对首领单位增伤"],
-    "全武增": ["全武器增伤"],
+    "全武增": ["全武学增效"],
     # DIY 计算器使用的简称
     "最小外攻": ["最小外功攻击"],
     "最大外攻": ["最大外功攻击"],
@@ -105,15 +123,15 @@ def normalize_stat(raw_name: str) -> str | None:
     match = difflib.get_close_matches(name, list(pool), n=1, cutoff=0.72)
     if match:
         return pool[match[0]]
-    if name.endswith("增伤"):
-        return name  # 武学特技（如 无名剑法·蓄力技增伤）按原文保留
+    if name.endswith("增伤") or name.endswith("增效"):
+        return name  # 武学特技/武器增效（如 无名剑法·蓄力技增伤、枪武学增效）按原文保留
     return None
 
 
 def stat_type(canonical: str) -> str:
     if canonical in CANONICAL_STATS:
         return CANONICAL_STATS[canonical]["type"]
-    return "percent" if canonical.endswith("增伤") else "flat"
+    return "percent" if canonical.endswith(("增伤", "增效")) else "flat"
 
 
 def parse_value(raw: str) -> tuple[float, str] | None:
