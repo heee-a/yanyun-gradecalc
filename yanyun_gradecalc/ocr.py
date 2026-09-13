@@ -101,7 +101,11 @@ def recognize(image_path: str) -> Piece:
 
 
 def recognize_image(data: bytes, max_side: int = 2200) -> Piece:
-    """识别图片字节流（网页上传入口）。大图先等比缩小，显著加速 OCR。"""
+    """识别图片字节流（网页上传入口）。
+
+    对暗光/斜拍照片自动做多轮识别：原图、CLAHE 局部对比度增强、
+    亮度拉伸各识别一次，选“已知词条最多”的结果；足够好时提前结束。
+    """
     import cv2
     import numpy as np
 
@@ -113,8 +117,36 @@ def recognize_image(data: bytes, max_side: int = 2200) -> Piece:
     scale = max_side / max(h, w)
     if scale < 1:
         img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
-    result, _ = _get_ocr()(img)
-    return parse_ocr_result(result or [], source="upload")
+
+    def quality(piece: Piece) -> tuple:
+        return (sum(1 for a in piece.affixes if a.known),
+                len(piece.affixes),
+                1 if piece.craft_score else 0)
+
+    best: tuple[tuple, Piece] | None = None
+    for variant in _enhance_variants(img):
+        result, _ = _get_ocr()(variant)
+        piece = parse_ocr_result(result or [], source="upload")
+        q = quality(piece)
+        if best is None or q > best[0]:
+            best = (q, piece)
+        if q[0] >= 4:  # 已识别出足够多的已知词条，无需更多轮
+            break
+    piece = best[1]
+    piece.source = "upload"
+    return piece
+
+
+def _enhance_variants(img):
+    """生成识别变体：原图、CLAHE 增强、亮度拉伸。"""
+    import cv2
+
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    l2 = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8)).apply(l)
+    enhanced = cv2.cvtColor(cv2.merge((l2, a, b)), cv2.COLOR_LAB2BGR)
+    stretched = cv2.convertScaleAbs(img, alpha=1.35, beta=18)
+    return [img, enhanced, stretched]
 
 
 def parse_ocr_result(result, source: str = "") -> Piece:

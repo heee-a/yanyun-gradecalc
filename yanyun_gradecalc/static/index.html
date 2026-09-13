@@ -142,6 +142,13 @@
   </div>
 
   <div class="card">
+    <h2>整套方案（保存在本机浏览器，互不影响）</h2>
+    <div class="frow"><label>方案名</label><input class="f" id="schemeName" placeholder="如：毕业破竹鸢"></div>
+    <button class="primary" id="saveScheme">💾 保存当前整套方案</button>
+    <div id="schemeList" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
     <h2>装备照片（识别后可修改）<span class="prog" id="prog"></span></h2>
     <label class="upload" id="batchPick">📷 一次选择多张装备照片（每部位一张）
       <input type="file" id="batchFile" accept="image/*" multiple>
@@ -222,12 +229,15 @@ function renderSets() {
   }
 }
 
-function renderXinfa() {
+function renderXinfa(loadout) {
   const rule = (state.engine.xinfa || {})[state.flow] || { default: ["", "", "", ""], choices: [[], [], [], []] };
-  state.xinfa = [...rule.default];
+  state.xinfa = [...(Array.isArray(loadout) && loadout.length === 4 ? loadout : rule.default)];
+  while (state.xinfa.length < 4) state.xinfa.push("");
   const box = $("xinfaSlots"); box.innerHTML = "";
-  rule.default.forEach((name, i) => {
-    const cands = [...new Set(rule.choices[i] || [])];
+  state.xinfa.forEach((name0, i) => {
+    const name = name0 || rule.default[i];
+    let cands = [...new Set(rule.choices[i] || [])];
+    if (name && !cands.includes(name)) cands.push(name);  // 载入方案时可能带非候选心法
     const locked = cands.length === 0;
     const row = document.createElement("div");
     row.className = "frow"; row.style.margin = "0";
@@ -252,7 +262,7 @@ function buildSlotGrid() {
     const card = document.createElement("div");
     card.className = "slot"; card.id = "slot-" + key;
     card.innerHTML = `<h3><span>${SLOT_LABELS[key]}</span><span class="dim" id="sl-info-${key}">未识别</span></h3>` +
-      `<label class="upload small" id="sl-up-${key}">📷 拍摄/选择<input type="file" accept="image/*" capture="environment"></label>` +
+      `<label class="upload small" id="sl-up-${key}">📷 拍摄/选择<input type="file" accept="image/*"></label>` +
       `<div id="sl-body-${key}"></div>`;
     g.appendChild(card);
     const inp = card.querySelector("input");
@@ -442,6 +452,80 @@ function bindBatch() {
     f.value = "";
   };
 }
+
+/* ---------- 整套方案：保存在本机浏览器 localStorage ---------- */
+const SCHEME_KEY = "ygc_schemes_v1";
+
+function loadSchemes() {
+  try { return JSON.parse(localStorage.getItem(SCHEME_KEY)) || {}; } catch { return {}; }
+}
+function serializeScheme() {
+  return {
+    flow: state.flow, xinfa: state.xinfa.slice(0, 4),
+    setName: $("setName").value, bow: $("bowSel").value, armory: $("armorySel").value,
+    savedAt: new Date().toLocaleString(),
+    slots: Object.fromEntries(Object.entries(state.slots).map(([k, s]) => [k, {
+      piece: s.piece, mainUid: s.mainUid,
+      rows: s.rows.map(r => ({ name: r.name, raw_name: r.raw_name, value: r.value,
+                               unit: r.unit, converted: r.converted, recommended: r.recommended,
+                               dinyin: r.dinyin, known: r.known, isBase: r.isBase,
+                               include: r.include })),
+    }])),
+  };
+}
+function applyScheme(sc) {
+  state.flow = sc.flow || state.flow;
+  $("flowSel").value = state.flow;
+  renderSets();
+  $("setName").value = sc.setName || "";
+  $("bowSel").value = sc.bow || "precision";
+  $("armorySel").value = sc.armory || "本系";
+  state.slots = {};
+  buildSlotGrid();
+  renderXinfa(sc.xinfa);
+  for (const k in sc.slots) {
+    const s0 = sc.slots[k];
+    const rows = s0.rows.map(r => ({ ...r, uid: newUid() }));
+    state.slots[k] = { piece: s0.piece, rows, mainUid: s0.mainUid };
+    renderSlot(k);
+    const info = $("sl-info-" + k);
+    if (info) info.innerHTML = '<span class="ok">✓ 已载入</span>';
+    const card = $("slot-" + k);
+    if (card) card.classList.add("done");
+  }
+  updateProg();
+  toast("方案已载入");
+}
+function renderSchemeList() {
+  const box = $("schemeList"); box.innerHTML = "";
+  const schemes = loadSchemes();
+  const names = Object.keys(schemes).sort((a, b) => (schemes[b].savedAt || "").localeCompare(schemes[a].savedAt || ""));
+  if (!names.length) { box.innerHTML = '<div class="dim">还没有保存的方案</div>'; return; }
+  for (const name of names) {
+    const sc = schemes[name];
+    const row = document.createElement("div");
+    row.className = "frow"; row.style.margin = "0 0 6px";
+    row.innerHTML = `<label>${esc(name)}<div class="dim" style="font-size:11px">${esc(sc.savedAt || "")}</div></label>` +
+      `<div style="display:flex; gap:6px">` +
+      `<button class="chip ld">载入</button><button class="chip del2">删除</button></div>`;
+    row.querySelector(".ld").onclick = () => applyScheme(schemes[name]);
+    row.querySelector(".del2").onclick = () => {
+      const all = loadSchemes(); delete all[name]; saveSchemes(all); renderSchemeList();
+    };
+    box.appendChild(row);
+  }
+}
+$("saveScheme").onclick = () => {
+  const name = $("schemeName").value.trim() ||
+    `${state.flow || "方案"}-${new Date().toLocaleDateString()}`;
+  const all = loadSchemes();
+  all[name] = serializeScheme();
+  saveSchemes(all);
+  $("schemeName").value = "";
+  renderSchemeList();
+  toast(`方案「${name}」已保存（本机浏览器）`);
+};
+renderSchemeList();
 
 buildSlotGrid();
 bindBatch();

@@ -10,12 +10,15 @@
 from __future__ import annotations
 
 import json
+import os
 import queue
+import secrets
 import shutil
 import socket
 import subprocess
 import threading
 from pathlib import Path
+from datetime import datetime
 
 from flask import Flask, jsonify, request, send_from_directory
 
@@ -122,8 +125,13 @@ ENGINE = Engine()
 def create_app(builds_dir: str | None = None, max_table_path: str | None = None) -> Flask:
     app = Flask(__name__, static_folder=None)
     app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32MB
-    builds = load_builds(_resolve_builds_dir(builds_dir))
+    app.config["ADMIN_TOKEN"] = os.environ.get("YGC_ADMIN_TOKEN") or secrets.token_urlsafe(6)
+    builds_path = _resolve_builds_dir(builds_dir)
+    holder = {"builds": load_builds(builds_path)}   # 可热重载
     max_table = load_max_table(max_table_path)
+
+    def reload_builds() -> None:
+        holder["builds"] = load_builds(builds_path)
 
     @app.get("/")
     def index():
@@ -132,7 +140,7 @@ def create_app(builds_dir: str | None = None, max_table_path: str | None = None)
     @app.get("/api/config")
     def config():
         return jsonify({
-            "builds": {name: b.get("affix_weights", {}) for name, b in builds.items()},
+            "builds": {name: b.get("affix_weights", {}) for name, b in holder["builds"].items()},
             "max_table": max_table,
         })
 
@@ -155,7 +163,7 @@ def create_app(builds_dir: str | None = None, max_table_path: str | None = None)
             "base_stats": [_affix_json(a) for a in piece.base_stats],
             "suggest": suggest_slot(piece),
             "max_table": max_table,
-            "builds": {name: b.get("affix_weights", {}) for name, b in builds.items()},
+            "builds": {name: b.get("affix_weights", {}) for name, b in holder["builds"].items()},
         })
 
     @app.get("/api/engine")
@@ -165,6 +173,34 @@ def create_app(builds_dir: str | None = None, max_table_path: str | None = None)
             return jsonify({"available": True, **info})
         except Exception as e:  # node 缺失/脚本缺失等
             return jsonify({"available": False, "error": str(e)})
+
+    @app.post("/api/update-data")
+    def update_data():
+        """上传新的毕业率计算器 xlsx -> 自动提取流派 -> 热重载。
+
+        需要管理令牌：Header X-Admin-Token（服务启动时打印）。
+        """
+        if request.headers.get("X-Admin-Token", "") != app.config["ADMIN_TOKEN"]:
+            return jsonify({"error": "管理令牌错误（X-Admin-Token）"}), 403
+        f = request.files.get("file")
+        if not f or not f.filename.lower().endswith(".xlsx"):
+            return jsonify({"error": "请上传 .xlsx 计算器文件"}), 400
+        imports_dir = Path("source_data") / "imports"
+        try:
+            imports_dir.mkdir(parents=True, exist_ok=True)
+            name = f"{datetime.now():%Y%m%d-%H%M%S}-{Path(f.filename).name}"
+            dest = imports_dir / name
+            f.save(dest)
+            from .build_import import import_build
+
+            out = import_build(dest, builds_path)
+            reload_builds()
+            data = json.loads(out.read_text(encoding="utf-8"))
+            return jsonify({"ok": True, "build": data["name"],
+                            "affixes": sorted(data.get("affix_weights", {})),
+                            "all_builds": sorted(holder["builds"])})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
     @app.post("/api/gradrate")
     def gradrate():
@@ -236,6 +272,7 @@ def main(argv: list[str] | None = None) -> None:
     args = p.parse_args(argv)
 
     app = create_app(args.builds_dir, args.max_table)
+    print(f"数据更新接口: POST /api/update-data（Header X-Admin-Token: {app.config['ADMIN_TOKEN']}）")
     print("网页版已就绪，浏览器打开：")
     lan_ip = ""
     for ip in _lan_ips():
