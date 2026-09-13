@@ -1,0 +1,15 @@
+{
+  "name": "鸣金虹",
+  "source_file": "yysls.leoq7.com best40 (1 组)",
+  "weights_source": "yysls.leoq7.com best40 最优配置词条分布（40 条）",
+  "panel_stats": [],
+  "affix_weights": {
+    "最大外功攻击": 0.3,
+    "劲": 0.25,
+    "势": 0.2,
+    "会意率": 0.125,
+    "对首领单位增伤": 0.05,
+    "全武学增效": 0.05,
+    "剑武学增效": 0.025
+  }
+}
