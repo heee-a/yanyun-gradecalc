@@ -165,15 +165,8 @@
 <main id="tab-full" class="hidden">
   <div class="card">
     <div class="frow"><label>流派</label><select class="f" id="flowSel"></select></div>
-    <div class="frow"><label>心法 1-4</label>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px">
-        <input class="f xf" id="xf1" list="xfList"><input class="f xf" id="xf2" list="xfList">
-        <input class="f xf" id="xf3" list="xfList"><input class="f xf" id="xf4" list="xfList">
-      </div>
-      <datalist id="xfList"></datalist>
-    </div>
-    <div class="frow"><label>套装</label><input class="f" id="setName" list="setList" placeholder="易相套装 / 玉斗套装 …">
-      <datalist id="setList"><option value="易相套装"><option value="玉斗套装"></datalist></div>
+    <div class="frow"><label>心法（随流派变化）</label><div id="xinfaSlots" style="display:grid; gap:6px"></div></div>
+    <div class="frow"><label>套装</label><select class="f" id="setName"></select></div>
     <div class="frow"><label>弓决</label>
       <select class="f" id="bowSel">
         <option value="precision">精准</option>
@@ -213,7 +206,7 @@ const $ = id => document.getElementById(id);
 const state = {
   affixes: [], builds: {}, maxTable: {}, sel: "__auto__",   // tab1
   engine: null,                                              // tab2
-  flow: "", xinfa: ["易水歌", "沧海帖", "", ""],
+  flow: "", xinfa: [],   // 由引擎 meta 按流派填充（4 槽）
   slots: {},                                                 // tab2: slot -> {piece, affixes, baseStats, mainUid}
 };
 const SLOT_LABELS = {
@@ -394,34 +387,50 @@ async function loadEngineMeta() {
     }
     sel.onchange = () => { state.flow = sel.value; applyXinfaDefaults(); };
     state.flow = sel.value || "";
+    renderSetOptions();
     applyXinfaDefaults();
   } catch (e) {
     toast("引擎不可用：" + e.message + "（需要安装 Node.js 并在仓库根目录运行）", 5000);
   }
 }
 function applyXinfaDefaults() {
-  const inputs = [$("xf1"), $("xf2"), $("xf3"), $("xf4")];
-  const defs = { 易水歌: 0, 沧海帖: 1 };
-  inputs.forEach((inp, i) => {
-    inp.value = state.xinfa[i] || "";
-    inp.oninput = () => { state.xinfa[i] = inp.value.trim(); };
-  });
-  for (const spec of (state.engine.classXinfaInputs || {})[state.flow] || []) {
-    const idx = spec.field === "third_xinfa" ? 2 : spec.field === "fourth_xinfa" ? 3 : null;
-    if (idx !== null && !state.xinfa[idx]) {
-      inputs[idx].value = spec.default || "";
-      state.xinfa[idx] = inputs[idx].value;
+  // 心法槽位规则完全来自站点：meta.xinfa[flow] = {default:[4], choices:[每槽候选，空=锁定]}
+  const rule = (state.engine.xinfa || {})[state.flow] || { default: ["", "", "", ""], choices: [[], [], [], []] };
+  state.xinfa = [...rule.default];
+  const box = $("xinfaSlots"); box.innerHTML = "";
+  rule.default.forEach((name, i) => {
+    const cands = [...new Set(rule.choices[i] || [])];  // 去重
+    const locked = cands.length === 0;
+    const row = document.createElement("div");
+    row.className = "frow";
+    row.style.margin = "0";
+    if (locked) {
+      row.innerHTML = `<label>槽${i + 1}（固定）</label><div class="f" style="padding:7px 10px;background:#f1f3f6;border-radius:8px">${name || "—"}</div>`;
+      box.appendChild(row);
+    } else {
+      const opts = cands.map(c => `<option value="${c}" ${c === name ? "selected" : ""}>${c}</option>`).join("");
+      row.innerHTML = `<label>槽${i + 1}</label><select class="f">${opts}</select>`;
+      const sel = row.querySelector("select");
+      sel.onchange = () => { state.xinfa[i] = sel.value; };
+      box.appendChild(row);
     }
+  });
+}
+
+function renderSetOptions() {
+  const sel = $("setName"); sel.innerHTML = "";
+  const empty = document.createElement("option");
+  empty.value = ""; empty.textContent = "（不指定套装）";
+  sel.appendChild(empty);
+  for (const nm of state.engine.setNames || []) {
+    const o = document.createElement("option");
+    o.value = nm; o.textContent = nm;
+    const bonus = (state.engine.setData || {})[nm];
+    if (bonus && Object.keys(bonus).length)
+      o.textContent += `（主词条 ${Object.entries(bonus).map(([k, v]) => k + "+" + v).join("、")}）`;
+    sel.appendChild(o);
   }
-  // datalist 候选：当前流派候选 + 常见心法
-  const dl = $("xfList"); dl.innerHTML = "";
-  const cands = new Set(["易水歌", "沧海帖", "征人归", "断石之构", "大唐歌", "所恨年年",
-                         "弦墨篇", "燕别云岫", "四时无常", "大卷微身", "三穷致知"]);
-  for (const spec of (state.engine.classXinfaInputs || {})[state.flow] || [])
-    (spec.candidates || []).forEach(c => cands.add(c));
-  for (const c of cands) {
-    const o = document.createElement("option"); o.value = c; dl.appendChild(o);
-  }
+  sel.onchange = () => {};
 }
 function buildSlotGrid() {
   const g = $("slotGrid"); g.innerHTML = "";
@@ -518,7 +527,7 @@ $("calcBtn").onclick = async () => {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({
         className: state.flow, bow: $("bowSel").value, armory: $("armorySel").value,
-        setName: $("setName").value.trim(), xinfa: state.xinfa.filter(x => x),
+        setName: $("setName").value, xinfa: state.xinfa.slice(0, 4),
         equippedItems: equipped,
       }),
     });
